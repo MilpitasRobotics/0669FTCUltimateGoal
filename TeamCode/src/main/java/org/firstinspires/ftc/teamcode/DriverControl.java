@@ -8,6 +8,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class DriverControl extends LinearOpMode {
     MXRFTCRobot robot = new MXRFTCRobot();
 
+    boolean clawToggleOC = false; //when clawToggleOC (OC - open closed) is false, the claw is open
+    boolean clawToggleUD = false; //when clawToggleUD (UD - up down) is false, the claw is down
+
     @Override
     public void runOpMode(){
         robot.init(hardwareMap, telemetry);
@@ -22,12 +25,24 @@ public class DriverControl extends LinearOpMode {
 
             //claw operation - open/close claw
             if(gamepad1.a){ //if gamepad's a button is pressed...
-
+                clawToggleOC = !clawToggleOC; //set the value of clawToggleOC to the opposite of itself
+                if(clawToggleOC){ //if the claw is toggled on (true), then the claw will close
+                    robot.clawOpenClose.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+                }
+                else{ //if the claw is toggled off (false), then the claw will open
+                    robot.clawOpenClose.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+                }
             }
 
             //claw operation - flip claw up and down
             if(gamepad1.b){ //if gamepad's b button is pressed...
-
+                clawToggleUD = !clawToggleUD; //set the value of clawToggleUD to the opposite of itself
+                if(clawToggleUD){ //if the claw is toggled on (true), then the claw will flip up
+                    robot.clawUpDown.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+                }
+                else{ //if the claw is toggled off (false), then the claw will flip down
+                    robot.clawUpDown.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+                }
             }
 
             //flywheel and servo pusher activation/deactivation

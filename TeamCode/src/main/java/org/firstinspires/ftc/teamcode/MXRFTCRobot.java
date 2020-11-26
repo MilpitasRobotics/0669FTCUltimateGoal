@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class MXRFTCRobot {
     //Hardware
     public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intake, lift;
-    public Servo claw, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR, leftRampServo, rightRampServo;
+    public Servo clawOpenClose, clawUpDown, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR, leftRampServo, rightRampServo;
 
     //variables
     public double currentRampAngle = 0.5; //90 degrees
@@ -33,7 +33,8 @@ public class MXRFTCRobot {
         lift = hwMap.get(DcMotor.class, "LI");
 
         //Intake and Flywheel Servos
-        claw = hwMap.get(Servo.class, "CLW");
+        clawOpenClose = hwMap.get(Servo.class, "CLO");
+        clawUpDown = hwMap.get(Servo.class, "CLU");
         leftLinSlide = hwMap.get(Servo.class, "LLS");
         rightLinSlide = hwMap.get(Servo.class, "RLS");
         flyWheelPush = hwMap.get(Servo.class, "FWP");
@@ -51,10 +52,12 @@ public class MXRFTCRobot {
         intake.setDirection(DcMotor.Direction.FORWARD);
         lift.setDirection(DcMotor.Direction.FORWARD);
 
-        //Reset servo positions to normal
-        flyWheelPush.setPosition(0);
-        flyWheelRampL.setPosition(0.5);
+        //Reset servo positions to normal [THESE VALUES ARE ARBITRARY FOR NOW, THEY NEED TESTING]
+        flyWheelPush.setPosition(0); //flywheel pusher is by default retracted
+        flyWheelRampL.setPosition(0.5); //flywheel ramp by default starts horizontal (90 degrees)
         flyWheelRampR.setPosition(0.5);
+        clawOpenClose.setPosition(0); //claw by default starts open
+        clawUpDown.setPosition(9); //claw by default starts down
 
         telemetry.addLine("Initialization Complete");
         telemetry.update();
