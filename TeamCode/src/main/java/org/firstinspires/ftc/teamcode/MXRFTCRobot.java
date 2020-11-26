@@ -10,6 +10,7 @@ public class MXRFTCRobot {
     //Hardware
     public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intake, lift;
     public Servo clawOpenClose, clawUpDown, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR, leftRampServo, rightRampServo;
+    public double lastRingPush = 0;
 
     //variables
     public double currentRampAngle = 0.5; //90 degrees
@@ -77,13 +78,29 @@ public class MXRFTCRobot {
         flyWheelRampR.setPosition(currentRampAngle);
     }
 
+    public void toggleFlyWheel(boolean state){ //true - activated, false - deactivated
+        if(state) {
+            flyWheel.setPower(1.0); //set flywheel motor to max speed
+            lastRingPush = runtime.seconds(); //lastRingPush is set to the current runtime so that we can calculate the gap between the current timestep and the last time the ring was pushed
+        }
+        else{
+            flyWheel.setPower(0); //set flywheel power to zero speed
+            flyWheelPush.setPosition(0); //return pusher to original place
+            lastRingPush = 0;
+        }
+
+    }
+
     public void setFlywheelSpeed(double speed){
         flyWheel.setPower(speed);
     }
 
-    public void pushRing(){ //arbitrary values for now, needs to be tested
-        flyWheelPush.setPosition(0.5);
-        flyWheelPush.setPosition(0);
+    public void pushRing(){ //NOT SURE IF THIS WILL WORK, NEEDS TESTING!
+        if(lastRingPush - runtime.seconds() >= 2) {
+            flyWheelPush.setPosition(0.5);
+            flyWheelPush.setPosition(0);
+            lastRingPush = runtime.seconds();
+        }
     }
 
     //Movement methods

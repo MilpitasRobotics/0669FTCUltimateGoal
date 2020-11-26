@@ -10,6 +10,7 @@ public class DriverControl extends LinearOpMode {
 
     boolean clawToggleOC = false; //when clawToggleOC (OC - open closed) is false, the claw is open
     boolean clawToggleUD = false; //when clawToggleUD (UD - up down) is false, the claw is down
+    boolean flyWheelToggle = false; //when flyWheelToggle is false, the flywheel system is deactivated
 
     @Override
     public void runOpMode(){
@@ -37,7 +38,13 @@ public class DriverControl extends LinearOpMode {
 
             //flywheel and servo pusher activation/deactivation
             if(gamepad1.x){ //if gamepad's x button is pressed...
+                flyWheelToggle = !flyWheelToggle; //set the value of flyWheelToggle to the opposite of itself
+                robot.toggleFlyWheel(flyWheelToggle); //refer to MXRFTCRobot.java for details
+            }
 
+            //code to make the servo push rings into the flywheel every 2 seconds
+            if(flyWheelToggle){
+                robot.pushRing();
             }
 
             //lift linear slide up
