@@ -96,6 +96,25 @@ public class MXRFTCRobot {
         bRightDrive.setPower(leftJSY+leftJSY-rightJSX);
     }
 
+    //claw controls
+    public void toggleClawOC(boolean state){ //true - closed, false - open
+        if(state){ //if the claw is toggled on (true), then the claw will close
+            clawOpenClose.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+        }
+        else{ //if the claw is toggled off (false), then the claw will open
+            clawOpenClose.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+        }
+    }
+
+    public void toggleClawUD(boolean state){ //true - up, false - down
+        if(state){ //if the claw is toggled on (true), then the claw will flip up
+            clawUpDown.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+        }
+        else{ //if the claw is toggled off (false), then the claw will flip down
+            clawUpDown.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+        }
+    }
+
     //UNFINISHED AUTON METHODS
     public void driveForward(double distance){
 

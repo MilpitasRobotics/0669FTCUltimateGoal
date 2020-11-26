@@ -26,23 +26,13 @@ public class DriverControl extends LinearOpMode {
             //claw operation - open/close claw
             if(gamepad1.a){ //if gamepad's a button is pressed...
                 clawToggleOC = !clawToggleOC; //set the value of clawToggleOC to the opposite of itself
-                if(clawToggleOC){ //if the claw is toggled on (true), then the claw will close
-                    robot.clawOpenClose.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
-                }
-                else{ //if the claw is toggled off (false), then the claw will open
-                    robot.clawOpenClose.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
-                }
+                robot.toggleClawOC(clawToggleOC); //refer to MXRFTCRobot.java for details
             }
 
             //claw operation - flip claw up and down
             if(gamepad1.b){ //if gamepad's b button is pressed...
                 clawToggleUD = !clawToggleUD; //set the value of clawToggleUD to the opposite of itself
-                if(clawToggleUD){ //if the claw is toggled on (true), then the claw will flip up
-                    robot.clawUpDown.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
-                }
-                else{ //if the claw is toggled off (false), then the claw will flip down
-                    robot.clawUpDown.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
-                }
+                robot.toggleClawUD(clawToggleUD); //refer to MXRFTCRobot.java for details
             }
 
             //flywheel and servo pusher activation/deactivation
