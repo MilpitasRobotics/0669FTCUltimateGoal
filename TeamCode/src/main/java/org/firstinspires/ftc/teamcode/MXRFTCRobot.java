@@ -14,7 +14,7 @@ public class MXRFTCRobot {
     //variables
     public double currentRampAngle = 0.5; //90 degrees
 
-    private ElapsedTime runtime = new ElapsedTime();
+    public ElapsedTime runtime = new ElapsedTime();
 
     public MXRFTCRobot(){
     }
@@ -78,7 +78,7 @@ public class MXRFTCRobot {
         flyWheel.setPower(speed);
     }
 
-    public void pushRing(){
+    public void pushRing(){ //arbitrary values for now, needs to be tested
         flyWheelPush.setPosition(0.5);
         flyWheelPush.setPosition(0);
     }
@@ -93,6 +93,7 @@ public class MXRFTCRobot {
         bRightDrive.setPower(leftJSY+leftJSY-rightJSX);
     }
 
+    //UNFINISHED AUTON METHODS
     public void driveForward(double distance){
 
     }
