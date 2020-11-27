@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class MXRFTCRobot {
     //Hardware
     public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intake, lift;
-    public Servo clawOpenClose, clawUpDown, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR, leftRampServo, rightRampServo;
+    public Servo clawOpenCloseL, clawOpenCloseR, clawUpDownL, clawUpDownR, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR, leftRampServo, rightRampServo;
     public double lastRingPush = 0;
 
     //variables
@@ -34,8 +34,10 @@ public class MXRFTCRobot {
         lift = hwMap.get(DcMotor.class, "LI");
 
         //Intake and Flywheel Servos
-        clawOpenClose = hwMap.get(Servo.class, "CLO");
-        clawUpDown = hwMap.get(Servo.class, "CLU");
+        clawOpenCloseL = hwMap.get(Servo.class, "CLOL");
+        clawOpenCloseR = hwMap.get(Servo.class, "CLOR");
+        clawUpDownL = hwMap.get(Servo.class, "CLUL");
+        clawUpDownR = hwMap.get(Servo.class, "CLUR");
         leftLinSlide = hwMap.get(Servo.class, "LLS");
         rightLinSlide = hwMap.get(Servo.class, "RLS");
         flyWheelPush = hwMap.get(Servo.class, "FWP");
@@ -57,8 +59,10 @@ public class MXRFTCRobot {
         flyWheelPush.setPosition(0); //flywheel pusher is by default retracted
         flyWheelRampL.setPosition(0.5); //flywheel ramp by default starts horizontal (90 degrees)
         flyWheelRampR.setPosition(0.5);
-        clawOpenClose.setPosition(0); //claw by default starts open
-        clawUpDown.setPosition(9); //claw by default starts down
+        clawOpenCloseL.setPosition(0.5); //claw by default starts open
+        clawOpenCloseR.setPosition(0.5); //claw by default starts open
+        clawUpDownL.setPosition(0.5);//claw by default starts down
+        clawUpDownR.setPosition(0.5);//claw by default starts down
 
         telemetry.addLine("Initialization Complete");
         telemetry.update();
@@ -116,19 +120,23 @@ public class MXRFTCRobot {
     //claw controls
     public void toggleClawOC(boolean state){ //true - closed, false - open
         if(state){ //if the claw is toggled on (true), then the claw will close
-            clawOpenClose.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawOpenCloseL.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawOpenCloseR.setPosition(0);
         }
         else{ //if the claw is toggled off (false), then the claw will open
-            clawOpenClose.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawOpenCloseL.setPosition(0.5); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawOpenCloseR.setPosition(0.5); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
         }
     }
 
     public void toggleClawUD(boolean state){ //true - up, false - down
         if(state){ //if the claw is toggled on (true), then the claw will flip up
-            clawUpDown.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawUpDownL.setPosition(1.0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawUpDownR.setPosition(0);
         }
         else{ //if the claw is toggled off (false), then the claw will flip down
-            clawUpDown.setPosition(0); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawUpDownL.setPosition(0.5); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
+            clawUpDownR.setPosition(0.5); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
         }
     }
 
