@@ -17,6 +17,8 @@ public class MXRFTCRobot {
 
     public ElapsedTime runtime = new ElapsedTime();
 
+    public double currentPosition = 0;
+
     public MXRFTCRobot(){
     }
 
@@ -157,4 +159,22 @@ public class MXRFTCRobot {
 
     }
 
+    //Linear slide methods
+    public void linearSlideMoveUp() {
+        while (gamepad1.dpadup) {
+            currentPosition += 0.1;
+            leftLinSlide.setPosition(currentPosition);
+            rightLinSlide.setPosition(currentPosition);
+        }
+    }
+
+    public void linearSlideMoveDown() {
+        while (gamepad1.dpaddown) {
+            double currentPosition = 0.1;
+            leftLinSlide.setPosition(currentPosition);
+            rightLinSlide.setPosition(currentPosition);
+        }
+    }
+
 }
+
