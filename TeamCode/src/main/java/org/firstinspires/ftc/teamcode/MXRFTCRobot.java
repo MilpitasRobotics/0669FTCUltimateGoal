@@ -161,19 +161,15 @@ public class MXRFTCRobot {
 
     //Linear slide methods
     public void linearSlideMoveUp() {
-        while (gamepad1.dpadup) {
-            currentPosition += 0.1;
-            leftLinSlide.setPosition(currentPosition);
-            rightLinSlide.setPosition(currentPosition);
-        }
+        currentPosition += 0.1;
+        leftLinSlide.setPosition(currentPosition);
+        rightLinSlide.setPosition(currentPosition);
     }
 
-    public void linearSlideMoveDown() {
-        while (gamepad1.dpaddown) {
-            double currentPosition = 0.1;
-            leftLinSlide.setPosition(currentPosition);
-            rightLinSlide.setPosition(currentPosition);
-        }
+    public void linearSlideMoveDown(){
+        double currentPosition = 0.1;
+        leftLinSlide.setPosition(currentPosition);
+        rightLinSlide.setPosition(currentPosition);
     }
 
 }

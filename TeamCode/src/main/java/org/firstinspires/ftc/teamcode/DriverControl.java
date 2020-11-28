@@ -48,13 +48,13 @@ public class DriverControl extends LinearOpMode {
             }
 
             //lift linear slide up
-            if(gamepad1.dpad_up){ //if gamepad's dpad up is pressed...
-
+            while(gamepad1.dpad_up){ //if gamepad's dpad up is pressed...
+                robot.linearSlideMoveUp();
             }
 
             //drop linear slide down
-            if(gamepad1.dpad_down){ //if gamepad's dpad down is pressed...
-
+            while(gamepad1.dpad_down){ //if gamepad's dpad down is pressed...
+                robot.linearSlideMoveDown();
             }
 
             //intake [WILL BE CHANGED]
