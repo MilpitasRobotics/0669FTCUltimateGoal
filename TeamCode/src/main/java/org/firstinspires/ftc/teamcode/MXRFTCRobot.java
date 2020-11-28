@@ -46,8 +46,6 @@ public class MXRFTCRobot {
         flyWheelPush = hwMap.get(Servo.class, "FWP");
         flyWheelRampL = hwMap.get(Servo.class, "FRL");
         flyWheelRampR = hwMap.get(Servo.class, "FRR");
-        leftRampServo = hwMap.get(Servo.class, "LRS");
-        rightRampServo = hwMap.get(Servo.class, "RRS");
 
         //Direction Declaration
         fLeftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -56,7 +54,7 @@ public class MXRFTCRobot {
         bRightDrive.setDirection(DcMotor.Direction.REVERSE);
         flyWheel.setDirection(DcMotor.Direction.FORWARD);
         intakeTop.setDirection(DcMotor.Direction.FORWARD);
-        intakeBot.setDirection(DcMotor.Direction.FORWARD);
+        intakeBot.setDirection(DcMotor.Direction.REVERSE);
         lift.setDirection(DcMotor.Direction.FORWARD);
 
         //Reset servo positions to normal [THESE VALUES ARE ARBITRARY FOR NOW, THEY NEED TESTING]
