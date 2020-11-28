@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class MXRFTCRobot {
     //Hardware
-    public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intake, lift;
+    public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intakeTop, intakeBot, lift;
     public Servo clawOpenCloseL, clawOpenCloseR, clawUpDownL, clawUpDownR, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR, leftRampServo, rightRampServo;
     public double lastRingPush = 0;
 
@@ -32,7 +32,8 @@ public class MXRFTCRobot {
 
         //Intake and Flywheel Motors
         flyWheel = hwMap.get(DcMotor.class, "FW");
-        intake = hwMap.get(DcMotor.class, "IN");
+        intakeTop = hwMap.get(DcMotor.class, "IT");
+        intakeBot = hwMap.get(DcMotor.class, "IB");
         lift = hwMap.get(DcMotor.class, "LI");
 
         //Intake and Flywheel Servos
@@ -54,7 +55,8 @@ public class MXRFTCRobot {
         bLeftDrive.setDirection(DcMotor.Direction.FORWARD);
         bRightDrive.setDirection(DcMotor.Direction.REVERSE);
         flyWheel.setDirection(DcMotor.Direction.FORWARD);
-        intake.setDirection(DcMotor.Direction.FORWARD);
+        intakeTop.setDirection(DcMotor.Direction.FORWARD);
+        intakeBot.setDirection(DcMotor.Direction.FORWARD);
         lift.setDirection(DcMotor.Direction.FORWARD);
 
         //Reset servo positions to normal [THESE VALUES ARE ARBITRARY FOR NOW, THEY NEED TESTING]
