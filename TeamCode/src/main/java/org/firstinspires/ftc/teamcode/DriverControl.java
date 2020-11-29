@@ -11,9 +11,11 @@ public class DriverControl extends LinearOpMode {
     boolean clawToggleOC = false; //when clawToggleOC (OC - open closed) is false, the claw is open
     boolean clawToggleUD = false; //when clawToggleUD (UD - up down) is false, the claw is down
     boolean flyWheelToggle = false; //when flyWheelToggle is false, the flywheel system is deactivated
+    boolean intakeToggle = false; //when intakeToggle is false, the intake system is deactivated
+    boolean outtakeToggle = false; //when outtakeToggle is false, the outtake system is deactivated
 
     @Override
-    public void runOpMode(){
+    public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
 
         waitForStart();
@@ -44,8 +46,13 @@ public class DriverControl extends LinearOpMode {
 
             //code to make the servo push rings into the flywheel every 2 seconds
             if(flyWheelToggle){
-                robot.pushRing();
+                sleep(1000);
+                robot.flyWheelPush.setPosition(.5);
+                sleep(1000);
+                robot.flyWheelPush.setPosition(.9);
+                sleep(2000);
             }
+
 
             //lift linear slide up
             while(gamepad1.dpad_up){ //if gamepad's dpad up is pressed...
@@ -56,16 +63,27 @@ public class DriverControl extends LinearOpMode {
             while(gamepad1.dpad_down){ //if gamepad's dpad down is pressed...
                 robot.linearSlideMoveDown();
             }
-
-            //intake [WILL BE CHANGED]
-            if(gamepad1.left_trigger >= 0.5){ //if the gamepad's left trigger is at least halfway pressed...
-
+            //intake code
+            if(gamepad1.left_trigger >= 0.5) {
+                intakeToggle = !intakeToggle;
+                if (intakeToggle) {
+                    robot.intake(1);
+                }
+                else{
+                    robot.intake(0);
+                }
+            }
+            //outtake code
+            if(gamepad1.right_trigger >= 0.5) {
+                outtakeToggle = !outtakeToggle;
+                if (outtakeToggle) {
+                    robot.intake(-1);
+                }
+                else{
+                    robot.intake(0);
+                }
             }
 
-            //outtake [WILL BE CHANGED]
-            if(gamepad1.right_trigger >= 0.5){ //if the gamepad's left trigger is at least halfway pressed...
-
-            }
         }
 
     }

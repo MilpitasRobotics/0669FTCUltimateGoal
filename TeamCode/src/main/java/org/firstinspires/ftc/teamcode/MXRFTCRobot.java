@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class MXRFTCRobot {
     //Hardware
     public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intakeTop, intakeBot, lift;
-    public Servo clawOpenCloseL, clawOpenCloseR, clawUpDownL, clawUpDownR, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR, leftRampServo, rightRampServo;
+    public Servo clawOpenCloseL, clawOpenCloseR, clawUpDownL, clawUpDownR, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR;
     public double lastRingPush = 0;
 
     //variables
@@ -52,13 +52,13 @@ public class MXRFTCRobot {
         fRightDrive.setDirection(DcMotor.Direction.REVERSE);
         bLeftDrive.setDirection(DcMotor.Direction.FORWARD);
         bRightDrive.setDirection(DcMotor.Direction.REVERSE);
-        flyWheel.setDirection(DcMotor.Direction.FORWARD);
+        flyWheel.setDirection(DcMotor.Direction.REVERSE);
         intakeTop.setDirection(DcMotor.Direction.FORWARD);
         intakeBot.setDirection(DcMotor.Direction.REVERSE);
         lift.setDirection(DcMotor.Direction.FORWARD);
 
         //Reset servo positions to normal [THESE VALUES ARE ARBITRARY FOR NOW, THEY NEED TESTING]
-        flyWheelPush.setPosition(0); //flywheel pusher is by default retracted
+        flyWheelPush.setPosition(.9); //flywheel pusher is by default retracted
         flyWheelRampL.setPosition(0.5); //flywheel ramp by default starts horizontal (90 degrees)
         flyWheelRampR.setPosition(0.5);
         clawOpenCloseL.setPosition(0.5); //claw by default starts open
@@ -91,7 +91,7 @@ public class MXRFTCRobot {
         }
         else{
             flyWheel.setPower(0); //set flywheel power to zero speed
-            flyWheelPush.setPosition(0); //return pusher to original place
+            flyWheelPush.setPosition(.9); //return pusher to original place
             lastRingPush = 0;
         }
 
@@ -101,10 +101,10 @@ public class MXRFTCRobot {
         flyWheel.setPower(speed);
     }
 
-    public void pushRing(){ //NOT SURE IF THIS WILL WORK, NEEDS TESTING!
-        if(lastRingPush - runtime.seconds() >= 2) {
+    public void pushRing(boolean state){ //NOT SURE IF THIS WILL WORK, NEEDS TESTING!
+        if(lastRingPush - runtime.seconds() >= 2 && state) {
+            flyWheelPush.setPosition(.9);
             flyWheelPush.setPosition(0.5);
-            flyWheelPush.setPosition(0);
             lastRingPush = runtime.seconds();
         }
     }
@@ -113,10 +113,10 @@ public class MXRFTCRobot {
     public void mecanumDrive(double leftJSY, double leftJSX, double rightJSX){
         //IMPORTANT! YOU HAVE TO REVERSE THE JOYSTICK INPUTS IN THE PARAMETERS FOR THIS TO WORK CORRECTLY
         //leftJSX - left/right movement, leftJSY - forward/backward movement, rightJSX - cw/ccw rotation
-        fLeftDrive.setPower(leftJSY+leftJSX+rightJSX);
-        fRightDrive.setPower(leftJSY-leftJSY-rightJSX);
-        bLeftDrive.setPower(leftJSY-leftJSY+rightJSX);
-        bRightDrive.setPower(leftJSY+leftJSY-rightJSX);
+        fLeftDrive.setPower(0.75*(leftJSY+leftJSX+rightJSX));
+        fRightDrive.setPower(0.75*(leftJSY-leftJSY-rightJSX));
+        bLeftDrive.setPower(0.75*(leftJSY-leftJSY+rightJSX));
+        bRightDrive.setPower(0.75*(leftJSY+leftJSY-rightJSX));
     }
 
     //claw controls
@@ -140,6 +140,11 @@ public class MXRFTCRobot {
             clawUpDownL.setPosition(0.5); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
             clawUpDownR.setPosition(0.5); //VALUE STILL ARBITRARY, NEEDS TO BE TESTED
         }
+    }
+
+    public void intake(double speed){
+        intakeBot.setPower(speed);
+        intakeTop.setPower(speed);
     }
 
     //UNFINISHED AUTON METHODS
