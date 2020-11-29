@@ -25,6 +25,9 @@ public class DriverControl extends LinearOpMode {
         while(opModeIsActive()){ //write what you want the robot to do while it is running here!
             //motion controls
             robot.mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x); //this covers back and forth movement and rotation - refer to MXRFTCRobot.java for more details
+            if(gamepad1.left_stick_y == 0 || gamepad1.left_stick_x == 0 || gamepad1.right_stick_x == 0){
+                robot.mecanumDrive(0,0,0); //stops the robot in the event that it is given too many commands
+            }
 
             //claw operation - open/close claw
             if(gamepad1.a){ //if gamepad's a button is pressed...
@@ -40,6 +43,7 @@ public class DriverControl extends LinearOpMode {
 
             //flywheel and servo pusher activation/deactivation
             if(gamepad1.x){ //if gamepad's x button is pressed...
+                robot.mecanumDrive(0,0,0); //stop the robot so that it doesn't "autopilot" itself after pressing x
                 flyWheelToggle = !flyWheelToggle; //set the value of flyWheelToggle to the opposite of itself
                 robot.toggleFlyWheel(flyWheelToggle); //refer to MXRFTCRobot.java for details
             }
@@ -64,7 +68,7 @@ public class DriverControl extends LinearOpMode {
                 robot.linearSlideMoveDown();
             }
             //intake code
-            if(gamepad1.left_trigger >= 0.5) {
+            if(gamepad1.left_trigger >= 0.1) {
                 intakeToggle = !intakeToggle;
                 if (intakeToggle) {
                     robot.intake(1);
@@ -74,7 +78,7 @@ public class DriverControl extends LinearOpMode {
                 }
             }
             //outtake code
-            if(gamepad1.right_trigger >= 0.5) {
+            if(gamepad1.right_trigger >= 0.1) {
                 outtakeToggle = !outtakeToggle;
                 if (outtakeToggle) {
                     robot.intake(-1);
