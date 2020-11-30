@@ -113,10 +113,17 @@ public class MXRFTCRobot {
     public void mecanumDrive(double leftJSY, double leftJSX, double rightJSX){
         //IMPORTANT! YOU HAVE TO REVERSE THE JOYSTICK INPUTS IN THE PARAMETERS FOR THIS TO WORK CORRECTLY
         //leftJSX - left/right movement, leftJSY - forward/backward movement, rightJSX - cw/ccw rotation
-        fLeftDrive.setPower(0.75*(leftJSY+leftJSX+rightJSX));
-        fRightDrive.setPower(0.75*(leftJSY-leftJSY-rightJSX));
-        bLeftDrive.setPower(0.75*(leftJSY-leftJSY+rightJSX));
-        bRightDrive.setPower(0.75*(leftJSY+leftJSY-rightJSX));
+          if( runtime.time() > servoDelayTime ) {
+          servoPosition += servoDelta;
+           servoPosition = Range.clip(servoPosition, 0, 1);
+          servo.setPosition(servoPosition);
+        fLeftDrive.setPower
+        fLeftDrive.setPower(0.75*(leftJSY+leftJSX+rightJSX)); 
+        fRightDrive.setPower(0.75*(leftJSY+leftJSY-rightJSX));
+        bLeftDrive.setPower(10.75*(leftJSY-leftJSY+rightJSX));
+        bRightDrive.setPower(0.75*(leftJSY-leftJSY-rightJSX));
+        runtime.reset();
+    }
     }
 
     //claw controls
