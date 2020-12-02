@@ -5,15 +5,17 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import java.lang.Math;
 
 public class MXRFTCRobot {
+
     //Hardware
     public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intakeTop, intakeBot, lift;
     public Servo clawOpenCloseL, clawOpenCloseR, clawUpDownL, clawUpDownR, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR;
     public double lastRingPush = 0;
 
     //variables
-    public double currentRampAngle = 0.5; //90 degrees
+    public double currentRampServoPosition = 0.333; //90 degrees
 
     public ElapsedTime runtime = new ElapsedTime();
 
@@ -57,6 +59,16 @@ public class MXRFTCRobot {
         intakeBot.setDirection(DcMotor.Direction.REVERSE);
         lift.setDirection(DcMotor.Direction.FORWARD);
 
+        //Set Motors to Encoder Mode
+        fLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intakeTop.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intakeBot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         //Reset servo positions to normal [THESE VALUES ARE ARBITRARY FOR NOW, THEY NEED TESTING]
         flyWheelPush.setPosition(.9); //flywheel pusher is by default retracted
         flyWheelRampL.setPosition(0.5); //flywheel ramp by default starts horizontal (90 degrees)
@@ -72,16 +84,16 @@ public class MXRFTCRobot {
 
     //Flywheel methods
     public void setRampAngle(double angleChange){
-        double change = angleChange/180;
-        currentRampAngle += change;
+        double change = angleChange/270;
+        currentRampServoPosition += change;
 
-        if(currentRampAngle > 1.0)
-            currentRampAngle = 1.0;
-        else if(currentRampAngle < 0.0)
-            currentRampAngle = 0.0;
+        if(currentRampServoPosition > 1.0)
+            currentRampServoPosition = 1.0;
+        else if(currentRampServoPosition < 0.0)
+            currentRampServoPosition = 0.0;
 
-        flyWheelRampL.setPosition(currentRampAngle);
-        flyWheelRampR.setPosition(currentRampAngle);
+        flyWheelRampL.setPosition(currentRampServoPosition);
+        flyWheelRampR.setPosition(currentRampServoPosition);
     }
 
     public void toggleFlyWheel(boolean state){ //true - activated, false - deactivated
@@ -113,10 +125,27 @@ public class MXRFTCRobot {
     public void mecanumDrive(double leftJSY, double leftJSX, double rightJSX){ //currently only works for rotation for some odd reason
         //IMPORTANT! YOU HAVE TO REVERSE THE JOYSTICK INPUTS IN THE PARAMETERS FOR THIS TO WORK CORRECTLY
         //leftJSX - left/right movement, leftJSY - forward/backward movement, rightJSX - cw/ccw rotation
-        fLeftDrive.setPower(0.75*(leftJSY+leftJSX+rightJSX));
-        fRightDrive.setPower(0.75*(leftJSY-leftJSY-rightJSX));
-        bLeftDrive.setPower(0.75*(leftJSY-leftJSY+rightJSX));
-        bRightDrive.setPower(0.75*(leftJSY+leftJSY-rightJSX));
+        double frontLeft, frontRight, backLeft, backRight, maximum;
+        frontLeft = leftJSY+leftJSX+rightJSX;
+        frontRight = leftJSY-leftJSX-rightJSX;
+        backLeft = leftJSY-leftJSX+rightJSX;
+        backRight = leftJSY+leftJSX-rightJSX;
+
+        maximum = Math.max(Math.abs(frontLeft), Math.abs(frontRight));
+        maximum = Math.max(Math.abs(backLeft), maximum);
+        maximum = Math.max(Math.abs(backRight),maximum);
+
+        if (maximum > 1.0){
+            frontLeft /= maximum;
+            frontRight /= maximum;
+            backLeft /= maximum;
+            backRight /= maximum;
+        }
+
+        fLeftDrive.setPower(frontLeft);
+        fRightDrive.setPower(frontRight);
+        bLeftDrive.setPower(backLeft);
+        bRightDrive.setPower(backRight);
     }
 
     //claw controls
