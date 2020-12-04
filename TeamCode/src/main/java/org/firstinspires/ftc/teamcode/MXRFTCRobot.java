@@ -170,7 +170,6 @@ public class MXRFTCRobot {
 
     public void linearSlideMoveDown() {
         while (gamepad1.dpaddown) {
-            double currentPosition = 0.1;
             leftLinSlide.setPosition(currentPosition);
             rightLinSlide.setPosition(currentPosition);
         }
