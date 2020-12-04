@@ -19,7 +19,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.teamcode.R;
 
 //other imports
 import java.lang.Math;
@@ -39,9 +38,21 @@ public class MXRFTCRobot {
     public static final double LR_GAIN = 0.02; //rate at which we correct off-axis error (left/right) - VALUE NEEDS TO BE TESTED
     public static final double FWDBK_GAIN = 0.02; //rate at which we correct distance error (forward/back) - VALUE NEEDS TO BE TESTED
 
-    //Vuforia
+    //Vuforia (cheers to 2818 for the vuforia demo code!)
+    private static final int MAX_TARGETS = 4;
+    private static final double ON_AXIS = 10; // Within 1.0 cm of target center-line
+    private static final double CLOSE_ENOUGH =  20; // Within 2.0 cm of final target standoff
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = VuforiaLocalizer.CameraDirection.BACK; //what camera would you like to use? FRONT = facing user (same side as display), BACK = away from user
-
+    private VuforiaTrackables targets; // List of active targets
+    private boolean targetFound = false;// true if Vuforia is tracking a target
+    private String targetName = null; // name of tracked target
+    private double robotX = 0; // X displacement from target's center
+    private double robotY = 0; // Y displacement from target's center
+    private double robotBearing = 0; // Robot's rotation around the Z axis (CCW is positive)
+    private double targetRange = 0; // Range from robot's center to target in mm
+    private double targetBearing = 0; // Heading of the target , relative to the robot's unrotated center
+    private double relativeBearing = 0; // Heading to the target from the robot's current bearing.
+                                        //   eg: a Positive RelativeBearing means the robot must turn CCW to point at the target image.
     //variables
     private Telemetry telem;
 
@@ -268,8 +279,99 @@ public class MXRFTCRobot {
     }
     //===========HARDWARE METHODS===========
 
-    //===========VUFORIA METHODS===========
+    //===========VUFORIA METHODS=========== (cheers to 2818 for the vuforia demo code!)
+    public boolean targetsAreVisible()  {
 
+        int targetTestID = 0;
+
+        // Check each target in turn, but stop looking when the first target is found.
+        while ((targetTestID < MAX_TARGETS) && !targetIsVisible(targetTestID)) {
+            targetTestID++ ;
+        }
+
+        return (targetFound);
+    }
+
+    public boolean targetIsVisible(int targetId) {
+
+        VuforiaTrackable target = targets.get(targetId);
+        VuforiaTrackableDefaultListener listener = (VuforiaTrackableDefaultListener)target.getListener();
+        OpenGLMatrix location  = null;
+
+        // if we have a target, look for an updated robot position
+        if ((target != null) && (listener != null) && listener.isVisible()) {
+            targetFound = true;
+            targetName = target.getName();
+
+            // If we have an updated robot location, update all the relevant tracking information
+            location  = listener.getUpdatedRobotLocation();
+            if (location != null) {
+
+                // Create a translation and rotation vector for the robot.
+                VectorF trans = location.getTranslation();
+                Orientation rot = Orientation.getOrientation(location, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+
+                // Robot position is defined by the standard Matrix translation (x and y)
+                robotX = trans.get(0);
+                robotY = trans.get(1);
+
+                // Robot bearing (in +vc CCW cartesian system) is defined by the standard Matrix z rotation
+                robotBearing = rot.thirdAngle;
+
+                // target range is based on distance from robot position to origin.
+                targetRange = Math.hypot(robotX, robotY);
+
+                // target bearing is based on angle formed between the X axis to the target range line
+                targetBearing = Math.toDegrees(-Math.asin(robotY / targetRange));
+
+                // Target relative bearing is the target Heading relative to the direction the robot is pointing.
+                relativeBearing = targetBearing - robotBearing;
+            }
+            targetFound = true;
+        }
+        else  {
+            // Indicate that there is no target visible
+            targetFound = false;
+            targetName = "None";
+        }
+
+        return targetFound;
+    }
+
+    public boolean autopilot(double standOffDistance) {
+        boolean closeEnough;
+
+        vuforiaMecanumAutonDrive(targetRange, robotY, relativeBearing);
+
+        // Determine if we are close enough to the target for action.
+        closeEnough = ( (Math.abs(robotX + standOffDistance) < CLOSE_ENOUGH) &&
+                (Math.abs(robotY) < ON_AXIS));
+
+        return (closeEnough);
+    }
+
+    public void addNavTelemetry() {
+        if (targetFound) {
+            // Display the current visible target name, robot info, target info, and required robot action.
+            telem.addData("Visible", targetName);
+            telem.addData("Robot", "[X]:[Y] (B) [%5.0fmm]:[%5.0fmm] (%4.0f°)",
+                    robotX, robotY, robotBearing);
+            telem.addData("Target", "[R] (B):(RB) [%5.0fmm] (%4.0f°):(%4.0f°)",
+                    targetRange, targetBearing, relativeBearing);
+            telem.addData("- Turn    ", "%s %4.0f°", relativeBearing < 0 ? ">>> CW " : "<<< CCW", Math.abs(relativeBearing));
+            telem.addData("- Strafe  ", "%s %5.0fmm", robotY < 0 ? "LEFT" : "RIGHT", Math.abs(robotY));
+            telem.addData("- Distance", "%5.0fmm", Math.abs(robotX));
+        } else {
+            telem.addData("Visible", "- - - -");
+        }
+    }
+
+    public void activateTracking() {
+
+        // Start tracking any of the defined targets
+        if (targets != null)
+            targets.activate();
+    }
     //===========VUFORIA METHODS===========
 
     //UNFINISHED AUTON METHODS
