@@ -1,11 +1,30 @@
 package org.firstinspires.ftc.teamcode;
 
+//hardware imports
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+//vuforia imports
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.teamcode.R;
+
+//other imports
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MXRFTCRobot {
 
@@ -14,7 +33,14 @@ public class MXRFTCRobot {
     public Servo clawOpenCloseL, clawOpenCloseR, clawUpDownL, clawUpDownR, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR;
     public double lastRingPush = 0;
 
+    //Vuforia
+    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = VuforiaLocalizer.CameraDirection.FRONT; //what camera would you like to use? FRONT = facing user (same side as display), BACK = away from user
+
     //variables
+    private Telemetry telem;
+
+    private static final float mmPerInch = 25.4f;
+
     public double currentRampServoPosition = 0.333; //90 degrees
 
     public ElapsedTime runtime = new ElapsedTime();
@@ -25,7 +51,10 @@ public class MXRFTCRobot {
     }
 
     public void init(HardwareMap hwMap, Telemetry telemetry){ //both the HardwareMap and Telemetry variables allow for us to use these FTC functions within a class. otherwise, we cannot use them
-        //Hardware Mapping
+        //Telemetry Declaration
+        telem = telemetry;
+
+        //===========Hardware Mapping===========
         //Chassis Motors
         fLeftDrive = hwMap.get(DcMotor.class, "FL");
         fRightDrive = hwMap.get(DcMotor.class, "FR");
@@ -78,10 +107,52 @@ public class MXRFTCRobot {
         clawUpDownL.setPosition(0.5);//claw by default starts down
         clawUpDownR.setPosition(0.5);//claw by default starts down
 
-        telemetry.addLine("Initialization Complete");
-        telemetry.update();
-    }
 
+        //===========Vuforia Initilaization===========
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(); //set up a vuforia parameter object to take parameters
+        parameters.vuforiaLicenseKey = "AdVSNpT/////AAABmd+SHN4W9UzliidNdqbjIU93QOYyh7J2/VolbtNyddazYgKps6LYF7lQ8S4Jn+dFJg4d2iPrcnDuVpFdP3jBuh6BBL/hzlWXnNDgcYdtvAcVt6dcHeCSMe49lnVSUcMpkvt1CI7IpaV/aUkcM5H10vFxeBEKb1mN1au5BPxeMyAlzWQ91G6Xdk/X55avO9DdOgWE1FcDBz11lELX6YL7nbLHjLnrEY0q4sTS9ly+WdMN0w5RfFLSVSP8h0zAuxpL1G+/6gbNJ2BQi2KZhwodHVThoAa4KyUw3KaEBZFv7TLY3Emg5t6JguK12SRekIMIf4cnD3RpPf/qvYJZm/R34gDch2c78Erh1AgOBKehXtq3"; //enter license key here
+
+        parameters.cameraDirection = CAMERA_CHOICE; //update camera parameter
+        parameters.useExtendedTracking = false; //disable extended tracking (inaccurate at high speeds)
+        VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters); //initialize a vuforia object with parameters defined above
+
+        VuforiaTrackables targetsUltimateGoal = vuforia.loadTrackablesFromAsset("UltimateGoal"); //load the trackable targets from a database somewhere
+        VuforiaTrackable blueTowerGoalTarget = targetsUltimateGoal.get(0);
+        blueTowerGoalTarget.setName("Blue Tower Goal Target");
+        VuforiaTrackable redTowerGoalTarget = targetsUltimateGoal.get(1);
+        redTowerGoalTarget.setName("Red Tower Goal Target");
+        VuforiaTrackable redAllianceTarget = targetsUltimateGoal.get(2);
+        redAllianceTarget.setName("Red Alliance Target");
+        VuforiaTrackable blueAllianceTarget = targetsUltimateGoal.get(3);
+        blueAllianceTarget.setName("Blue Alliance Target");
+        VuforiaTrackable frontWallTarget = targetsUltimateGoal.get(4);
+        frontWallTarget.setName("Front Wall Target");
+
+        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>(); //create an arraylist to shove all of the targets into
+        allTrackables.addAll(targetsUltimateGoal); //shove all of the above targets into an arraylist for easy use
+
+        OpenGLMatrix targetOrientation = OpenGLMatrix
+                .translation(0, 0, 150) //this moves the targets up 150cm (6 inches) above the floor so that the images are not inside of the floor (they spawn on 0,0,0)
+                .multiplied(Orientation.getRotationMatrix(AxesReference.EXTRINSIC,AxesOrder.XYZ, AngleUnit.DEGREES, 90, 0, -90));//rotates the image so it is not flat but instead vertical, and is now facing the positive x axis
+
+        final float CAMERA_FORWARD_DISPLACEMENT = -5 * mmPerInch; //center of the bot on the floor is zero, front of bot is +
+        final float CAMERA_LEFT_DISPLACEMENT = -2 * mmPerInch; //center of the bot on the floor is the zero, right is +
+        final float CAMERA_VERTICAL_DISPLACEMENT = 4.5f * mmPerInch; //upwards is the +z axis, zero being the field floor
+
+
+        OpenGLMatrix phoneLocation = OpenGLMatrix
+                .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
+                .multiplied(Orientation.getRotationMatrix(AxesReference.EXTRINSIC,AxesOrder.XYZ, AngleUnit.DEGREES, 0, 90, 0)); //flip the phone 90 degrees on the y axis so that the front of the phone faces towards the field
+
+        for(VuforiaTrackable trackable : allTrackables){
+            trackable.setLocation(targetOrientation); //sets all of the targets to the same orientation designated on line 134
+            ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocation, parameters.cameraDirection);//applies camera orientation as defined on line 143 to the phone
+        }
+
+        telem.addLine("Initialization Complete");
+        telem.update();
+    }
+    //===========HARDWARE METHODS===========
     //Flywheel methods
     public void setRampAngle(double angleChange){
         double change = angleChange/270;
@@ -131,9 +202,7 @@ public class MXRFTCRobot {
         backLeft = leftJSY-leftJSX+rightJSX;
         backRight = leftJSY+leftJSX-rightJSX;
 
-        maximum = Math.max(Math.abs(frontLeft), Math.abs(frontRight));
-        maximum = Math.max(Math.abs(backLeft), maximum);
-        maximum = Math.max(Math.abs(backRight),maximum);
+        maximum = Math.max(Math.max(Math.abs(frontLeft), Math.abs(frontRight)), Math.max(Math.abs(backLeft),Math.abs(backRight))); //compares all 4 motor values and sees which one is the largest
 
         if (maximum > 1.0){
             frontLeft /= maximum;
@@ -146,6 +215,9 @@ public class MXRFTCRobot {
         fRightDrive.setPower(frontRight);
         bLeftDrive.setPower(backLeft);
         bRightDrive.setPower(backRight);
+
+        telem.addLine("Motor Speeds - FL: " + frontLeft + " FR " + frontRight + " BL " + backLeft + " BR :" + backRight);
+        telem.update();
     }
 
     //claw controls
@@ -176,6 +248,24 @@ public class MXRFTCRobot {
         intakeTop.setPower(speed);
     }
 
+    //Linear slide methods
+    public void linearSlideMoveUp() {
+        currentPosition += 0.1;
+        leftLinSlide.setPosition(currentPosition);
+        rightLinSlide.setPosition(currentPosition);
+    }
+
+    public void linearSlideMoveDown(){
+        double currentPosition = 0.1;
+        leftLinSlide.setPosition(currentPosition);
+        rightLinSlide.setPosition(currentPosition);
+    }
+    //===========HARDWARE METHODS===========
+
+    //===========VUFORIA METHODS===========
+
+    //===========VUFORIA METHODS===========
+
     //UNFINISHED AUTON METHODS
     public void driveForward(double distance){
 
@@ -191,19 +281,6 @@ public class MXRFTCRobot {
 
     public void turnLeft(int degrees){
 
-    }
-
-    //Linear slide methods
-    public void linearSlideMoveUp() {
-        currentPosition += 0.1;
-        leftLinSlide.setPosition(currentPosition);
-        rightLinSlide.setPosition(currentPosition);
-    }
-
-    public void linearSlideMoveDown(){
-        double currentPosition = 0.1;
-        leftLinSlide.setPosition(currentPosition);
-        rightLinSlide.setPosition(currentPosition);
     }
 
 }
