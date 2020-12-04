@@ -31,10 +31,16 @@ public class MXRFTCRobot {
     //Hardware
     public DcMotor fLeftDrive, fRightDrive, bLeftDrive, bRightDrive, flyWheel, intakeTop, intakeBot, lift;
     public Servo clawOpenCloseL, clawOpenCloseR, clawUpDownL, clawUpDownR, leftLinSlide, rightLinSlide, flyWheelPush, flyWheelRampL, flyWheelRampR;
-    public double lastRingPush = 0;
+    private double lastRingPush = 0;
+    private double driveFwdBk = 0; //forward back motion in mm, + is forward
+    private double driveLR = 0; //left right motion in mm, + is right
+    private double driveRotate = 0; //rotating motion in degrees, + is ccw
+    public static final double ROT_GAIN = 0.01; //rate at which we correct heading error (rotation) - VALUE NEEDS TO BE TESTED
+    public static final double LR_GAIN = 0.02; //rate at which we correct off-axis error (left/right) - VALUE NEEDS TO BE TESTED
+    public static final double FWDBK_GAIN = 0.02; //rate at which we correct distance error (forward/back) - VALUE NEEDS TO BE TESTED
 
     //Vuforia
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = VuforiaLocalizer.CameraDirection.FRONT; //what camera would you like to use? FRONT = facing user (same side as display), BACK = away from user
+    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = VuforiaLocalizer.CameraDirection.BACK; //what camera would you like to use? FRONT = facing user (same side as display), BACK = away from user
 
     //variables
     private Telemetry telem;
@@ -142,7 +148,7 @@ public class MXRFTCRobot {
 
         OpenGLMatrix phoneLocation = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
-                .multiplied(Orientation.getRotationMatrix(AxesReference.EXTRINSIC,AxesOrder.XYZ, AngleUnit.DEGREES, 0, 90, 0)); //flip the phone 90 degrees on the y axis so that the front of the phone faces towards the field
+                .multiplied(Orientation.getRotationMatrix(AxesReference.EXTRINSIC,AxesOrder.XYZ, AngleUnit.DEGREES, 0, -90, 0)); //flip the phone 90 degrees on the y axis so that the front of the phone faces towards the field
 
         for(VuforiaTrackable trackable : allTrackables){
             trackable.setLocation(targetOrientation); //sets all of the targets to the same orientation designated on line 134
@@ -267,21 +273,15 @@ public class MXRFTCRobot {
     //===========VUFORIA METHODS===========
 
     //UNFINISHED AUTON METHODS
-    public void driveForward(double distance){
+    public void vuforiaMecanumAutonDrive(double driveFB, double driveStrafe, double driveRot){
+        //this method takes three variables - (driveFB) forward backwards motion in milimeters, (driveStrafe) left right motion in milimeters, and (driveRot) rotation in degrees and moves towards a target
+        double fwdBack= driveFB * FWDBK_GAIN;
+        double strafe= driveStrafe * LR_GAIN;
+        double rotation = driveRot * ROT_GAIN;
+        mecanumDrive(fwdBack,0,0);
+        mecanumDrive(0,strafe,0);
+        mecanumDrive(0,0,rotation);
 
     }
-
-    public void driveBackwards(double distance){
-
-    }
-
-    public void turnRight(int degrees){
-
-    }
-
-    public void turnLeft(int degrees){
-
-    }
-
 }
 
